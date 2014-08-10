@@ -1,0 +1,2 @@
+Building wxc
+/usr/bin/gcc -Wl,--hash-size=31 -Wl,--reduce-memory-overheads -Isrc/include -I/usr/include/wx-2.9-unofficial -I/usr/lib/x86_64-linux-gnu/wx/include/gtk2-unicode-2.9-unofficial -D__WXGTK__ -DWXUSINGDLL -D_FILE_OFFSET_BITS=64 -DwxcREFUSE_MEDIACTRL -fPIC -c src/cpp/eljaui.cpp -o dist/build/src/cpp/eljaui.o
