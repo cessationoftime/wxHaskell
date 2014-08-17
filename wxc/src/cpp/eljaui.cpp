@@ -1283,6 +1283,34 @@ EWXWEXPORT(void,wxAuiNotebook_Split)(wxAuiNotebook* self, size_t page, int direc
   self->Split(page, direction);
 }
 
+/* wxAuiNotebookEvent */
+
+EWXWEXPORT(void*,wxAuiNotebookEvent_Create)(int commandType, int winid)
+{
+   return (void*)new wxAuiNotebookEvent(commandType, winid);
+}
+
+EWXWEXPORT(wxAuiNotebook*,wxAuiNotebookEvent_GetDragSource)(wxAuiNotebookEvent* self)
+{
+   return self->GetDragSource();
+}
+
+/* wxBookCtrlEvent */
+
+EWXWEXPORT(void*,wxBookCtrlEvent_Create)(int commandType, int winid, int nSel, int nOldSel)
+{
+   return (void*)new wxBookCtrlEvent(commandType, winid, nSel, nOldSel);
+}
+
+EWXWEXPORT(int,wxBookCtrlEvent_GetSelection)(wxBookCtrlEvent* self)
+{
+   return self->GetSelection();
+}
+
+EWXWEXPORT(int,wxBookCtrlEvent_GetOldSelection)(wxBookCtrlEvent* self)
+{
+   return self->GetOldSelection();
+}
 
 /* wxAuiTabContainerButton */
 

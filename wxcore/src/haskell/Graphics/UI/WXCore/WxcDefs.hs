@@ -3704,6 +3704,34 @@ wxAUI_TBTOOL_TEXT_BOTTOM :: Int
 wxAUI_TBTOOL_TEXT_BOTTOM =  3
 -- end enum wxAuiToolBarToolTextOrientation
 
+-- enum for wxBookCtrlHitTest
+wxBK_HITTEST_NOWHERE :: Int
+wxBK_HITTEST_NOWHERE = 1
+wxBK_HITTEST_ONICON :: Int
+wxBK_HITTEST_ONICON = 2
+wxBK_HITTEST_ONLABEL :: Int
+wxBK_HITTEST_ONLABEL = 4
+wxBK_HITTEST_ONITEM :: Int
+wxBK_HITTEST_ONITEM = 6
+wxBK_HITTEST_ONPAGE :: Int
+wxBK_HITTEST_ONPAGE = 8
+-- end enum
+
+-- wxBookCtrl flags (common for wxNotebook, wxListbook, wxChoicebook, wxTreebook)
+wxBK_DEFAULT :: Int
+wxBK_DEFAULT = 0x0000
+wxBK_TOP :: Int
+wxBK_TOP = 0x0010
+wxBK_BOTTOM :: Int
+wxBK_BOTTOM = 0x0020
+wxBK_LEFT :: Int
+wxBK_LEFT = 0x0040
+wxBK_RIGHT :: Int
+wxBK_RIGHT = 0x0080
+wxBK_ALIGN_MASK :: Int
+wxBK_ALIGN_MASK = 240
+-- end wxBookCtrl flags
+
 -- enum wxSizerFlagBits
 
 wxFIXED_MINSIZE :: Int

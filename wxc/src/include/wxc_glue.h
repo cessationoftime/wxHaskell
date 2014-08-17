@@ -18,26 +18,26 @@ TClass(wxPalette) Null_Palette(  );
 TClass(wxPen) Null_Pen(  );
 
 /* Events */
-int expEVT_COMMAND_AUITOOLBAR_TOOL_DROPDOWN();
-int expEVT_COMMAND_AUITOOLBAR_OVERFLOW_CLICK();
-int expEVT_COMMAND_AUITOOLBAR_RIGHT_CLICK();
-int expEVT_COMMAND_AUITOOLBAR_MIDDLE_CLICK();
-int expEVT_COMMAND_AUITOOLBAR_BEGIN_DRAG();
-int expEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE();
-int expEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED();
-int expEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGING();
-int expEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSED();
-int expEVT_COMMAND_AUINOTEBOOK_BUTTON();
-int expEVT_COMMAND_AUINOTEBOOK_BEGIN_DRAG();
-int expEVT_COMMAND_AUINOTEBOOK_END_DRAG();
-int expEVT_COMMAND_AUINOTEBOOK_DRAG_MOTION();
-int expEVT_COMMAND_AUINOTEBOOK_ALLOW_DND();
-int expEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_DOWN();
-int expEVT_COMMAND_AUINOTEBOOK_TAB_MIDDLE_UP();
-int expEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_DOWN();
-int expEVT_COMMAND_AUINOTEBOOK_TAB_RIGHT_UP();
-int expEVT_COMMAND_AUINOTEBOOK_DRAG_DONE();
-int expEVT_COMMAND_AUINOTEBOOK_BG_DCLICK();
+int expEVT_AUITOOLBAR_TOOL_DROPDOWN();
+int expEVT_AUITOOLBAR_OVERFLOW_CLICK();
+int expEVT_AUITOOLBAR_RIGHT_CLICK();
+int expEVT_AUITOOLBAR_MIDDLE_CLICK();
+int expEVT_AUITOOLBAR_BEGIN_DRAG();
+int expEVT_AUINOTEBOOK_PAGE_CLOSE();
+int expEVT_AUINOTEBOOK_PAGE_CHANGED();
+int expEVT_AUINOTEBOOK_PAGE_CHANGING();
+int expEVT_AUINOTEBOOK_PAGE_CLOSED();
+int expEVT_AUINOTEBOOK_BUTTON();
+int expEVT_AUINOTEBOOK_BEGIN_DRAG();
+int expEVT_AUINOTEBOOK_END_DRAG();
+int expEVT_AUINOTEBOOK_DRAG_MOTION();
+int expEVT_AUINOTEBOOK_ALLOW_DND();
+int expEVT_AUINOTEBOOK_TAB_MIDDLE_DOWN();
+int expEVT_AUINOTEBOOK_TAB_MIDDLE_UP();
+int expEVT_AUINOTEBOOK_TAB_RIGHT_DOWN();
+int expEVT_AUINOTEBOOK_TAB_RIGHT_UP();
+int expEVT_AUINOTEBOOK_DRAG_DONE();
+int expEVT_AUINOTEBOOK_BG_DCLICK();
 int expEVT_AUI_PANE_BUTTON();
 int expEVT_AUI_PANE_CLOSE();
 int expEVT_AUI_PANE_MAXIMIZE();
@@ -1049,7 +1049,7 @@ TClassDef(wxAcceleratorTable)
 TClass(wxAcceleratorTable) wxAcceleratorTable_Create( int n, void* entries );
 void       wxAcceleratorTable_Delete( TSelf(wxAcceleratorTable) _obj );
 
-/* wxctivateEvent */
+/* wxActivateEvent */
 TClassDefExtend(wxActivateEvent,wxEvent)
 void       wxActivateEvent_CopyObject( TSelf(wxActivateEvent) _obj, void* obj );
 TBool      wxActivateEvent_GetActive( TSelf(wxActivateEvent) _obj );
@@ -1528,6 +1528,22 @@ void 	 wxAuiManagerEvent_SetDC (TSelf(wxAuiManagerEvent) _obj, TClass(wxDC) _pdc
 void 	 wxAuiManagerEvent_SetManager (TSelf(wxAuiManagerEvent) _obj, TClass(wxAuiManager) _manager );
 void 	 wxAuiManagerEvent_SetPane (TSelf(wxAuiManagerEvent) _obj, TClass(wxAuiPaneInfo) _pane );
 void 	 wxAuiManagerEvent_Veto (TSelf(wxAuiManagerEvent) _obj, TBool veto );
+
+
+/* wxAuiNotebookEvent */
+TClassDefExtend(wxAuiNotebookEvent, wxBookCtrlEvent)
+TClass(wxAuiNotebookEvent)  wxAuiNotebookEvent_Create(int command_type, int win_id);
+TClass(wxAuiNotebook) wxAuiNotebookEvent_GetDragSource();
+/* void SetDragSource(wxAuiNotebook* s) { m_dragSource = s; } */
+
+
+/* wxBookCtrlEvent */
+TClassDefExtend(wxBookCtrlEvent, wxNotifyEvent)
+TClass(wxBookCtrlEvent)  wxBookCtrlEvent_Create(int commandType, int winid, int nSel, int nOldSel);
+int     wxBookCtrlEvent_GetSelection();
+int     wxBookCtrlEvent_GetOldSelection();
+/* void    wxBookCtrlEvent_SetSelection(int nSel); */
+/* void    wxBookCtrlEvent_SetOldSelection(int nOldSel); */
 
 
 /* wxBookCtrlBase */
