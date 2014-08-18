@@ -1533,15 +1533,15 @@ void 	 wxAuiManagerEvent_Veto (TSelf(wxAuiManagerEvent) _obj, TBool veto );
 /* wxAuiNotebookEvent */
 TClassDefExtend(wxAuiNotebookEvent, wxBookCtrlEvent)
 TClass(wxAuiNotebookEvent)  wxAuiNotebookEvent_Create(int command_type, int win_id);
-TClass(wxAuiNotebook) wxAuiNotebookEvent_GetDragSource();
+TClass(wxAuiNotebook) wxAuiNotebookEvent_GetDragSource(TSelf(wxAuiNotebookEvent) _obj);
 /* void SetDragSource(wxAuiNotebook* s) { m_dragSource = s; } */
 
 
 /* wxBookCtrlEvent */
 TClassDefExtend(wxBookCtrlEvent, wxNotifyEvent)
 TClass(wxBookCtrlEvent)  wxBookCtrlEvent_Create(int commandType, int winid, int nSel, int nOldSel);
-int     wxBookCtrlEvent_GetSelection();
-int     wxBookCtrlEvent_GetOldSelection();
+int     wxBookCtrlEvent_GetSelection(TSelf(wxBookCtrlEvent) _obj);
+int     wxBookCtrlEvent_GetOldSelection(TSelf(wxBookCtrlEvent) _obj);
 /* void    wxBookCtrlEvent_SetSelection(int nSel); */
 /* void    wxBookCtrlEvent_SetOldSelection(int nOldSel); */
 
