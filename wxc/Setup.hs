@@ -1,7 +1,7 @@
 
 {-# LANGUAGE CPP #-}
 
-import Control.Monad (mapM_, when)
+import Control.Monad (filterM, join, mapM_, when)
 import Data.Functor  ( (<$>) )
 import Data.List (foldl', intersperse, intercalate, nub, lookup, isPrefixOf, isInfixOf)
 import Data.Maybe (fromJust, isNothing, isJust, listToMaybe)
@@ -34,6 +34,8 @@ import qualified Control.Exception as E
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+-- Some utility functions
+
 readProcess :: FilePath -> [String] -> String -> IO String
 readProcess cmd args stdin =
   Process.readProcess cmd args stdin
@@ -46,6 +48,17 @@ whenM :: Monad m => m Bool -> m () -> m ()
 whenM mp e = mp >>= \p -> when p e
 
 
+-- Find the first element in a list that matches a condition
+findM :: Monad m => (a -> m Bool) -> [a] -> m (Maybe a)
+findM _  []       = return Nothing
+findM mp (x : xs) =
+  do
+    r <- mp x
+    if r 
+      then return $ Just x
+      else findM mp xs
+
+    
 main :: IO ()
 main = defaultMainWithHooks simpleUserHooks
      { confHook = myConfHook
@@ -238,40 +251,67 @@ bitnessMismatch =
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
--- Find the most recent version of wxWidgets;
--- abort the setup procedure when no proper version of wxWidgets is found
+-- A list of wxWidgets versions that can be handled by this version of wxHaskell
+wxCompatibleVersions = ["3.0", "2.9"] -- Preferred version first
+
+
+-- Get the preprocessor/compiler/linker options used for the most recent
+-- compatible wxWidgets installed.
+-- Abort the setup procedure when no proper version of wxWidgets is found
 readWxConfig :: IO String
-readWxConfig = do
-    -- Try to find an acceptable version of wxWidgets
-    -- (a version that can be handled by this version of wxHaskell)
-    let wxAcceptableVersions = ["3.0", "2.9"] -- Preferred version first
+readWxConfig =
+  do
+    maybeWxVersion <- findWxVersion
 
-    -- The Windows port of wx-config doesn't let you specify a version, nor query the full version,
-    -- accordingly we just check what version is installed (which is returned with --release)
-    wxVersions <- case buildOS of
-      Windows -> sequence [readProcess "wx-config" ["--release"] ""]
-      _       -> mapM readVersion wxAcceptableVersions
-                 where readVersion x = E.catch (readProcess "wx-config" ["--version=" ++ x, "--version-full"] "") handleError
-                       handleError :: IOError -> IO String
-                       handleError _ = return ""
-
-    case [(x, y) | x <- wxAcceptableVersions, 
-                   y <- wxVersions, 
-                   x `isPrefixOf` y
-         ] of
-      [] ->
+    case maybeWxVersion of
+      Nothing ->
         error ("This version of wxc requires one of the following wxWidgets versions to be available: " 
-               ++ show wxAcceptableVersions
+               ++ show wxCompatibleVersions
               )
-      ((wxVersion, wxFullVersion) : _) ->
+      Just wxVersion ->
         do
-          putStrLn ("Configuring wxc to build against wxWidgets " ++ wxFullVersion)
+          putStrLn ("Configuring wxc to build against wxWidgets " ++ wxVersion)
 
           -- The Windows port of wx-config doesn't let you specify a version (yet)
           case buildOS of
-            -- TODO: Nasty Windows hack: wx-config-win barfs if --cppflags comes after --libs :-(
-            Windows -> readProcess "wx-config" ["--cppflags", "--libs", "all"] ""
-            _       -> readProcess "wx-config" ["--version=" ++ wxVersion, "--libs", "all", "--cppflags"] ""
+            -- wx-config-win does not list all libraries if --cppflags comes after --libs :-(
+            Windows -> wx_config ["--cppflags", "--libs", "all"]
+            _       -> wx_config ["--version=" ++ wxVersion, "--libs", "all", "--cppflags"]
+
+
+wx_config :: [String] -> IO String
+wx_config parms = 
+  readProcess "wx-config" parms ""
+    `E.onException` return ""
+
+
+ -- Try to find a compatible version of wxWidgets
+-- (a version that can be handled by this version of wxHaskell)
+findWxVersion :: IO (Maybe String)
+findWxVersion =
+  if buildOS == Windows
+    -- The Windows port of wx-config doesn't let you specify a version, nor query the full version,
+    -- accordingly we just check what version is installed (which is returned with --release)
+    then checkCompatibility <$> readVersionWindows 
+    else findM (fmap isCompatible . readVersion) wxCompatibleVersions
+      where
+        readVersionWindows :: IO String
+        readVersionWindows =
+          wx_config ["--version"]                          -- Sample output: 3.0.1
+
+        readVersion :: String -> IO String
+        readVersion x =
+          wx_config ["--version=" ++ x, "--version-full"]  -- Sample output: 3.0.1.0
+
+        isCompatible :: String -> Bool
+        isCompatible xs =
+          any (`isPrefixOf` xs) wxCompatibleVersions
+
+        checkCompatibility :: String -> Maybe String
+        checkCompatibility version =
+          if isCompatible version
+            then Just version 
+            else Nothing
 
 
 parseWxConfig :: String -> BuildInfo
@@ -356,7 +396,8 @@ linkCxxOpts ver out_dir basename basepath =
       Windows -> ["-Wl,--dll", "-shared", 
                   "-o", out_dir </> sharedLibName ver basename,
                   "-Wl,--out-implib," ++ "lib" ++ addExtension basename ".a",
-                  "-Wl,--export-all-symbols", "-Wl,--enable-auto-import"]
+                  "-Wl,--export-all-symbols", "-Wl,--enable-auto-import",
+                  "-Wl,-no-undefined,--enable-runtime-pseudo-reloc"]
       OSX -> ["-dynamiclib",
                   "-o", out_dir </> sharedLibName ver basename,
                   "-install_name", basepath </> sharedLibName ver basename,
@@ -369,8 +410,8 @@ linkCxxOpts ver out_dir basename basepath =
 -- exist, or is older than the source file.
 -- TODO: Does not do dependency resolution properly
 compileCxx :: ConfiguredProgram -- ^ Program used to perform C/C++ compilation (gcc)
-           -> [String] -- ^ Compile options provided by Cabal and wxConfig
-           -> [String] -- ^ Include paths provided by Cabal and wxConfig
+           -> [String] -- ^ Compile options provided by Cabal and wx-config
+           -> [String] -- ^ Include paths provided by Cabal and wx-config
            -> FilePath -- ^ Base output directory
            -> FilePath -- ^ Path to source file
            -> IO FilePath -- ^ Path to generated object code
